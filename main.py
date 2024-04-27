@@ -11,7 +11,7 @@ handpoints = [(i * 50 + 80, 130) for i in range(7)]
 ractpoints = [(i * 50 + 60, 0) for i in range(7)]
 
 # Initialize camera
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(0) 
 cap.set(3, wCam)
 cap.set(4, hCam)
 
@@ -25,6 +25,7 @@ songs = [pyglet.media.load(song) for song in playlist]
 
 
 def findHands(img, draw=True):
+    """Detects hands in the image and draws landmarks if draw parameter is set to True."""
     imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     results = hands.process(imgRGB)
     if results.multi_hand_landmarks and draw:
@@ -34,6 +35,7 @@ def findHands(img, draw=True):
 
 
 def findPositions(img, results, draw=True):
+    """Finds the positions of landmarks on detected hands."""
     lmList = []
 
     if results.multi_hand_landmarks:
@@ -64,6 +66,9 @@ def findPositions(img, results, draw=True):
 
 
 def playMusic(p1, p2):
+    """Plays music based on the hand position on the virtual piano."""
+    # Check if hand position is within the range of any piano key, and play the corresponding song
+    # based on the position
     if (handpoints[0][0] - 7 < p1 < handpoints[0][0] + 7) and (
             handpoints[0][1] - 7 < p2 < handpoints[0][1] + 7):
         cv2.rectangle(img, ractpoints[0], (ractpoints[0][0] + w, ractpoints[0][1] + h), (255, 0, 255), -1)
@@ -113,10 +118,12 @@ while True:
     img, results = findHands(img)
     img, lmlist = findPositions(img, results)
 
+    # Draw rectangles representing piano keys on the image
     for i, (rect, point) in enumerate(zip(ractpoints, handpoints)):
         cv2.rectangle(img, rect, (rect[0] + w, rect[1] + h), (255, 0, 255), 2)
         cv2.circle(img, point, 7, (255, 0, 255), cv2.FILLED)
 
+    # Check if hand landmarks are detected and play music accordingly
     if len(lmlist) >= 1:
         p1, p2 = lmlist[0][8][1:]
         p3, p4 = lmlist[0][12][1:]
